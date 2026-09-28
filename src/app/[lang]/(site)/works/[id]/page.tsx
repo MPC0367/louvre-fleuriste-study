@@ -9,6 +9,7 @@ import { Tag } from '@/components/Tag';
 import { WorkCard } from '@/components/WorkCard';
 import { Arrow } from '@/components/Icons';
 import { keepWords } from '@/lib/thai';
+import { ogBase } from '@/lib/og';
 
 export function generateStaticParams() {
   return langs.flatMap((lang) => works.map((w) => ({ lang, id: w.id })));
@@ -18,7 +19,14 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { lang, id } = await params;
   const w = getWork(id);
   if (!isLang(lang) || !w) return {};
-  return { title: `No. ${String(w.no).padStart(2, '0')} ${w.name[lang]}`, description: w.seen[lang], alternates: { canonical: `/${lang}/works/${id}` } };
+  const title = `No. ${String(w.no).padStart(2, '0')} ${w.name[lang]}`;
+  const description = w.seen[lang] || undefined;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/${lang}/works/${id}` },
+    openGraph: { ...ogBase(lang), title: `${title} — Louvre Fleuriste`, description, url: `/${lang}/works/${id}` },
+  };
 }
 
 export default async function WorkPage({ params }: { params: Promise<{ lang: string; id: string }> }) {

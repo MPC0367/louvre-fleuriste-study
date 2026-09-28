@@ -14,8 +14,17 @@ export default async function Works({ params }: { params: Promise<{ lang: string
   const { lang } = await params;
   if (!isLang(lang)) notFound();
   return (
-    <Suspense fallback={<WorksView lang={lang as Lang} />}>
-      <WorksBrowser lang={lang as Lang} />
-    </Suspense>
+    <>
+      {/* A filtered link: hide the pre-built, unfiltered gallery until the filter is applied (globals.css). */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "if(/[?&](kind|colour|occasion)=/.test(location.search)){var h=document.documentElement;h.classList.add('lf-filtering');setTimeout(function(){h.classList.remove('lf-filtering')},12000)}",
+        }}
+      />
+      <Suspense fallback={<WorksView lang={lang as Lang} prerender />}>
+        <WorksBrowser lang={lang as Lang} />
+      </Suspense>
+    </>
   );
 }

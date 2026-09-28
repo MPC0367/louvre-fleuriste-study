@@ -8,6 +8,7 @@ import { colourFamilies, getWork } from '@/content/works';
 import { rules } from '@/lib/rules';
 import { orderIcs, type PublicOrder } from '@/lib/engine';
 import { download, getOrder } from '@/lib/client-api';
+import { STATIC } from '@/lib/paths';
 import { Photo } from './Photo';
 import { Arrow } from './Icons';
 
@@ -27,7 +28,11 @@ export function OrderStatus({ lang }: { lang: Lang }) {
   useEffect(() => {
     let live = true;
     getOrder(ref, token)
-      .then((o) => live && setOrder(o))
+      .then((o) => {
+        if (!live) return;
+        setOrder(o);
+        window.scrollTo(0, 0); // the order form may have left the page scrolled down
+      })
       .catch(() => live && setOrder(null));
     return () => {
       live = false;
@@ -53,17 +58,18 @@ export function OrderStatus({ lang }: { lang: Lang }) {
   const win = rules.windows.find((w) => w.id === order.windowId)!;
   const colour = colourFamilies.find((x) => x.key === order.colour)?.[lang];
   const wd = t.weekdays[new Date(order.date + 'T00:00:00Z').getUTCDay()];
+  const cancelled = order.status === 'cancelled';
 
   return (
     <section className="wrap confirm">
       <div className="grid confirm__grid">
         <div className="confirm__copy">
-          <p className="hero__kicker label">{c.kicker}</p>
-          <h1 className="display h-xl">{c.title}</h1>
-          <p className="lede">{c.body}</p>
+          <p className="hero__kicker label">{cancelled ? c.cancelledKicker : STATIC ? c.demoKicker : c.kicker}</p>
+          <h1 className="display h-xl">{cancelled ? c.cancelledTitle : STATIC ? c.demoTitle : c.title}</h1>
+          <p className="lede">{cancelled ? c.cancelledBody : STATIC ? c.demoBody : c.body}</p>
           <p className="alert alert--info small">
             <span>
-              <span className="demo-mark">{t.concept.demo}</span> {c.preview}
+              <span className="demo-mark">{t.concept.demo}</span> {STATIC ? c.demoPreview : c.preview}
             </span>
           </p>
           <div>
@@ -74,20 +80,27 @@ export function OrderStatus({ lang }: { lang: Lang }) {
           </div>
           <div className="stack-s">
             <p className="label">{c.next}</p>
-            <p>{c.nextBody}</p>
+            <p>{STATIC ? c.demoNextBody : c.nextBody}</p>
             <p className="close__phones" style={{ gap: '4px 24px' }}>
               {shop.phones.value.map((p) => (
                 <a key={p.tel} href={`tel:${p.tel}`} className="link" style={{ color: 'var(--ink)' }}>
                   {p.display}
                 </a>
               ))}
+              {STATIC && (
+                <a href={shop.lineOA.value.url} target="_blank" rel="noopener noreferrer" className="link" style={{ color: 'var(--ink)' }} lang="en">
+                  LINE {shop.lineOA.value.id}
+                </a>
+              )}
             </p>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-            <button type="button" className="btn" onClick={() => download(`${order.ref}.ics`, orderIcs(order), 'text/calendar;charset=utf-8')}>
-              <span className="btn__diamond" aria-hidden="true" />
-              {c.calendar}
-            </button>
+            {!cancelled && (
+              <button type="button" className="btn" onClick={() => download(`${order.ref}.ics`, orderIcs(order, lang), 'text/calendar;charset=utf-8')}>
+                <span className="btn__diamond" aria-hidden="true" />
+                {c.calendar}
+              </button>
+            )}
             <Link href={`/${lang}/works`} className="btn btn--ghost">
               {c.again} <Arrow />
             </Link>
@@ -107,8 +120,8 @@ export function OrderStatus({ lang }: { lang: Lang }) {
             <dl>
               {(
                 [
-                  [c.status, c.statusNew],
-                  [c.payment, c.paymentNone],
+                  [c.status, STATIC && order.status === 'new' ? c.demoStatus : c.statuses[order.status] ?? c.statusNew],
+                  [c.payment, c.payments[order.payment] ?? c.paymentNone],
                   [t.fields.kind, order.kind === 'box' ? t.order.box : t.order.bouquet],
                   ...(work ? [[t.fields.work, `No. ${String(work.no).padStart(2, '0')} ${work.name[lang]}`]] : []),
                   [t.fields.budget, baht(order.budget, lang)],

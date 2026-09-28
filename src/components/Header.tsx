@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { dict, type Lang } from '@/content/i18n';
 import { shop } from '@/content/shop';
-import { LangSwitch } from './LangSwitch';
+import { LangLink, LangSwitch } from './LangSwitch';
 import { Phone } from './Icons';
 import { Logo } from './Logo';
 import { trimSlash } from '@/lib/paths';
@@ -81,7 +81,7 @@ export function Header({ lang }: { lang: Lang }) {
             ))}
           </nav>
           <div className="header__end">
-            <Suspense fallback={<span className="langswitch" />}>
+            <Suspense fallback={<LangLink lang={lang} />}>
               <LangSwitch lang={lang} />
             </Suspense>
             <Link href={`/${lang}/order`} className="btn" aria-current={current(`/${lang}/order`)}>

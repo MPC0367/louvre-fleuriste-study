@@ -97,7 +97,10 @@ export function enhance(root) {
     c.addEventListener('focusout', play);
     show(0);
     dots.forEach(function (d) { d.classList.remove('is-run'); });
-    whenLoaded(function () { if (!c.contains(document.activeElement) && !c.matches(':hover')) { show(i); play(); } });
+    whenLoaded(function () {
+      c.classList.add('is-live'); // the other slides' photos may load now (globals.css)
+      if (!c.contains(document.activeElement) && !c.matches(':hover')) { show(i); play(); }
+    });
   });
 
   // ── Autoscrolling strip: a slow, continuous drift that loops. Pauses on hover, touch and focus,

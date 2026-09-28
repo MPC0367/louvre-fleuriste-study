@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { dict, isLang, type Lang } from '@/content/i18n';
 import { Composer } from '@/components/Composer';
+import { STATIC } from '@/lib/paths';
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -19,7 +20,7 @@ export default async function Order({ params }: { params: Promise<{ lang: string
       <section className="pagehead wrap" style={{ paddingBottom: 'clamp(24px, 3vw, 40px)' }}>
         <div className="grid pagehead__grid">
           <h1 className="pagehead__title display h-xl">{t.order.title}</h1>
-          <p className="pagehead__lede lede">{t.order.lede}</p>
+          <p className="pagehead__lede lede">{STATIC ? t.order.demoLede : t.order.lede}</p>
         </div>
       </section>
       <section className="wrap composer">

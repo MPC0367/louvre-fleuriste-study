@@ -9,6 +9,7 @@ import { rules, type Kind, type Method } from '@/lib/rules';
 import { Arrow } from './Icons';
 import { keepWords } from '@/lib/thai';
 import { availability, placeOrder, uploadPicture } from '@/lib/client-api';
+import { STATIC } from '@/lib/paths';
 import { Tag } from './Tag';
 import { Calendar, type Day } from './Calendar';
 
@@ -149,6 +150,8 @@ export function Composer({ lang }: { lang: Lang }) {
     if (base.budget != null && base.budget < rules.minBudget[base.kind]) base.budget = null;
     setD(base);
     setRestored(had && !work && !colour && !kind);
+    const gap = [0, 1, 2, 3].find((n) => n < step && Object.keys(validateStep(n, base)).length > 0);
+    if (gap != null) goStep(gap, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -198,6 +201,7 @@ export function Composer({ lang }: { lang: Lang }) {
     const e: Record<string, string> = {};
     if (n === 0) {
       if (dr.budget == null || dr.budget < rules.minBudget[dr.kind]) e.budget = o.budgetLow(baht(rules.minBudget[dr.kind], lang));
+      else if (dr.budget > rules.maxBudget) e.budget = o.budgetHigh(baht(rules.maxBudget, lang));
     }
     if (n === 1) {
       if (uploading) e.uploadId = o.uploading;
@@ -228,6 +232,14 @@ export function Composer({ lang }: { lang: Lang }) {
     }
     return e;
   }
+
+  // Back/Forward within the form doesn't remount it: the same guard, whenever the step changes.
+  useEffect(() => {
+    if (!d) return;
+    const gap = [0, 1, 2, 3].find((n) => n < step && Object.keys(validateStep(n, d)).length > 0);
+    if (gap != null) goStep(gap, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   function next() {
     if (!d) return;
@@ -276,7 +288,7 @@ export function Composer({ lang }: { lang: Lang }) {
         try {
           localStorage.removeItem(KEY);
         } catch {}
-        router.push(`/${lang}/order/status?ref=${encodeURIComponent(j.ref)}&t=${encodeURIComponent(j.token)}`);
+        router.replace(`/${lang}/order/status?ref=${encodeURIComponent(j.ref)}&t=${encodeURIComponent(j.token)}`);
         return;
       }
       const err: ServerError = j.error ?? { code: 'server' };
@@ -288,7 +300,12 @@ export function Composer({ lang }: { lang: Lang }) {
         goStep(2);
       } else if (err.code === 'invalid' && err.fields?.length) {
         const map: Record<string, string> = {};
-        err.fields.forEach((f) => (map[f] = o.required));
+        err.fields.forEach(
+          (f) =>
+            (map[f] =
+              f === 'workId' ? o.workUnavailable : f === 'budget' && d.budget != null && d.budget > rules.maxBudget ? o.budgetHigh(baht(rules.maxBudget, lang)) : o.required),
+        );
+        if (err.fields.includes('workId')) set('workId', null);
         setErrors(map);
         const n = [0, 1, 2, 3].find((s) => STEP_FIELDS[s].some((f) => err.fields!.includes(f)));
         if (n != null) goStep(n);
@@ -494,6 +511,7 @@ export function Composer({ lang }: { lang: Lang }) {
                   <p className="field__help">{t.works.oneOff[work.format]}</p>
                 </div>
               )}
+              {err('workId')}
 
               <fieldset className="field">
                 <legend className="label">{o.kind}</legend>
@@ -948,7 +966,7 @@ export function Composer({ lang }: { lang: Lang }) {
                   ...(d.occasion ? [{ k: t.fields.occasion, v: occasionLabel(d.occasion)!, s: 1 }] : []),
                   ...(d.flowers ? [{ k: t.fields.flowers, v: d.flowers, s: 1 }] : []),
                   ...(d.uploadId ? [{ k: t.fields.reference, v: d.uploadName, s: 1 }] : []),
-                  { k: t.fields.date, v: `${dateLabel(d.date)} · ${windowLabel(d.windowId)}`, s: 2 },
+                  { k: t.fields.date, v: d.date ? `${dateLabel(d.date)} · ${windowLabel(d.windowId) ?? '—'}` : '—', s: 2 },
                   {
                     k: t.fields.method,
                     v:
@@ -976,7 +994,15 @@ export function Composer({ lang }: { lang: Lang }) {
               </dl>
               <div className="alert alert--info">
                 <p>
-                  <b>{o.pay}.</b> {o.payNote}
+                  {STATIC ? (
+                    <>
+                      <span className="demo-mark">{t.concept.demo}</span> {o.demoPayNote}
+                    </>
+                  ) : (
+                    <>
+                      <b>{o.pay}.</b> {o.payNote}
+                    </>
+                  )}
                 </p>
               </div>
             </>
@@ -1038,7 +1064,7 @@ export function Composer({ lang }: { lang: Lang }) {
           )}
         </div>
         <p className="small" style={{ marginTop: 20 }}>
-          {o.payNote}
+          {STATIC ? o.demoPayNote : o.payNote}
         </p>
         <p className="small" style={{ marginTop: 8 }}>
           <Link href={`/${lang}/contact`} className="textbtn">

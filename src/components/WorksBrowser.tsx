@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { keepWords } from '@/lib/thai';
 import { dict, type Lang } from '@/content/i18n';
 import { colourFamilies, worksNewest, type ColourFamily } from '@/content/works';
@@ -11,7 +12,7 @@ import { WorkCard } from '@/components/WorkCard';
  * back-button safe. WorksView renders any filter; WorksBrowser reads it from the address bar in the
  * browser, which lets the page be static (it pre-renders the unfiltered gallery).
  */
-export function WorksView({ lang, colour, occasion, kind }: { lang: Lang; colour?: string; occasion?: string; kind?: string }) {
+export function WorksView({ lang, colour, occasion, kind, prerender }: { lang: Lang; colour?: string; occasion?: string; kind?: string; prerender?: boolean }) {
   const t = dict[lang];
   const kinds = [
     { key: 'bouquet', th: 'ช่อดอกไม้', en: 'Bouquets' },
@@ -45,7 +46,7 @@ export function WorksView({ lang, colour, occasion, kind }: { lang: Lang; colour
           <p className="pagehead__lede lede">{keepWords(t.works.lede)}</p>
         </div>
       </section>
-      <section className="wrap" aria-label={t.works.filter}>
+      <section className="wrap" aria-label={t.works.filter} data-prerender={prerender || undefined}>
         <div className="head__row" style={{ paddingBottom: 16, borderBottom: '1px solid var(--line)', marginBottom: 'clamp(24px, 5vw, 72px)' }}>
           <div className="gallery__filters">
             <nav className="filters" aria-label={lang === 'th' ? 'ประเภท' : 'Kind'}>
@@ -86,7 +87,7 @@ export function WorksView({ lang, colour, occasion, kind }: { lang: Lang; colour
       </section>
       <section className="wrap" style={{ paddingBottom: 'clamp(96px, 12vw, 184px)' }}>
         {list.length ? (
-          <div className="gallery">
+          <div className="gallery" data-prerender={prerender || undefined}>
             {list.map((w, i) => (
               <WorkCard key={w.id} work={w} lang={lang} i={i} sizes="(max-width: 767px) 46vw, 304px" />
             ))}
@@ -101,5 +102,7 @@ export function WorksView({ lang, colour, occasion, kind }: { lang: Lang; colour
 
 export function WorksBrowser({ lang }: { lang: Lang }) {
   const q = useSearchParams();
+  // The filtered gallery is on screen now: lift the guard that hid the pre-built one (works/page.tsx).
+  useEffect(() => document.documentElement.classList.remove('lf-filtering'), []);
   return <WorksView lang={lang} colour={q.get('colour') ?? undefined} occasion={q.get('occasion') ?? undefined} kind={q.get('kind') ?? undefined} />;
 }

@@ -4,6 +4,8 @@
  * local server (SQLite, lib/booking.ts + lib/admin.ts) and the static demo (lib/demo-store.ts, in the
  * visitor's browser) run exactly the same rules.
  */
+import { dict, type Lang } from '@/content/i18n';
+import { shop } from '@/content/shop';
 import { getWork } from '@/content/works';
 import { addDays, rules, staticDayState, type DayState, type Kind, type Method } from './rules';
 
@@ -143,14 +145,14 @@ export function validate(body: Record<string, unknown>): { input?: OrderInput; f
   const kind = body.kind === 'box' ? 'box' : body.kind === 'bouquet' ? 'bouquet' : null;
   if (!kind) fields.push('kind');
   const budget = Math.round(Number(body.budget));
-  if (!kind || !Number.isFinite(budget) || budget < rules.minBudget[kind] || budget > 200000) fields.push('budget');
+  if (!kind || !Number.isFinite(budget) || budget < rules.minBudget[kind] || budget > rules.maxBudget) fields.push('budget');
   const method = body.method === 'delivery' ? 'delivery' : body.method === 'pickup' ? 'pickup' : null;
   if (!method) fields.push('method');
   const date = str(body.date, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) fields.push('date');
   const windowId = str(body.windowId, 8);
   if (!rules.windows.some((w) => w.id === windowId)) fields.push('windowId');
-  const workId = str(body.workId, 20) || null;
+  const workId = str(body.workId, 64) || null;
   if (workId && !getWork(workId)) fields.push('workId');
   const senderName = str(body.senderName, 80);
   if (!senderName) fields.push('senderName');
@@ -224,13 +226,13 @@ export function availabilityFrom(date: string, byWindow: Record<string, number>,
 /** Up to n open days near a date, nearest first, within the booking horizon from today. */
 export function nearestOpenFrom(date: string, today: string, dayAt: (d: string) => DayAvailability, n = 3) {
   const out: string[] = [];
-  for (let i = 1; i <= rules.horizonDays && out.length < n; i++) {
+  for (let i = 1; i <= rules.horizonDays; i++) {
     const d = addDays(today, i);
     if (d === date) continue;
     const a = dayAt(d);
     if (a.state === 'open' || a.state === 'peak') out.push(d);
   }
-  return out.sort((a, b) => Math.abs(+new Date(a) - +new Date(date)) - Math.abs(+new Date(b) - +new Date(date)));
+  return out.sort((a, b) => Math.abs(+new Date(a) - +new Date(date)) - Math.abs(+new Date(b) - +new Date(date))).slice(0, n);
 }
 
 /** Per-day load for the capacity view and the admin strip. */
@@ -496,17 +498,47 @@ export function toCsv(rows: AdminOrder[]) {
   return '﻿' + [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\r\n');
 }
 
-/** A calendar file for the delivery or collection window. */
-export function orderIcs(o: PublicOrder, now = new Date()) {
+/** RFC 5545 TEXT value: escape backslash, semicolon, comma and newlines. */
+const icsText = (s: string) => s.replace(/[\\;,]/g, (m) => '\\' + m).replace(/\r?\n/g, '\\n');
+
+/** RFC 5545 §3.1: fold lines at 75 octets, never inside a UTF-8 character (a Thai letter is 3 octets). */
+function icsFold(line: string) {
+  const out: string[] = [];
+  let cur = '';
+  let n = 0;
+  for (const ch of line) {
+    const cp = ch.codePointAt(0)!;
+    const b = cp < 0x80 ? 1 : cp < 0x800 ? 2 : cp < 0x10000 ? 3 : 4;
+    if (n + b > (out.length ? 74 : 75)) {
+      out.push(cur);
+      cur = '';
+      n = 0;
+    }
+    cur += ch;
+    n += b;
+  }
+  out.push(cur);
+  return out.join('\r\n ');
+}
+
+/**
+ * A calendar file for the delivery or collection window, in the customer's language. It says plainly that
+ * the order is a demonstration and how to order for real (the banner's own words).
+ */
+export function orderIcs(o: PublicOrder, lang: Lang, now = new Date()) {
   const w = rules.windows.find((x) => x.id === o.windowId)!;
+  const t = dict[lang];
   const d = o.date.replace(/-/g, '');
   const hm = (s: string) => s.replace(':', '') + '00';
-  const title = o.method === 'delivery' ? 'Louvre Fleuriste — flower delivery' : 'Louvre Fleuriste — collect flowers';
+  const title = `Louvre Fleuriste (${t.concept.demo}) — ${o.method === 'delivery' ? t.order.delivery : t.order.pickup}`;
+  const desc = [`${t.confirm.ref} ${o.ref}`, t.concept.bar, `${shop.phones.value.map((p) => p.display).join(' / ')} · LINE ${shop.lineOA.value.id}`].join('\n');
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//O2 Design Studio//Louvre Fleuriste demo//EN', 'CALSCALE:GREGORIAN',
     'BEGIN:VTIMEZONE', 'TZID:Asia/Bangkok', 'BEGIN:STANDARD', 'DTSTART:19700101T000000', 'TZOFFSETFROM:+0700', 'TZOFFSETTO:+0700', 'TZNAME:ICT', 'END:STANDARD', 'END:VTIMEZONE',
     'BEGIN:VEVENT', `UID:${o.ref}@louvre-fleuriste.demo`, `DTSTAMP:${now.toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
     `DTSTART;TZID=Asia/Bangkok:${d}T${hm(w.from)}`, `DTEND;TZID=Asia/Bangkok:${d}T${hm(w.to)}`,
-    `SUMMARY:${title}`, `DESCRIPTION:Order ${o.ref}. Awaiting the shop's confirmation.`, 'END:VEVENT', 'END:VCALENDAR',
-  ].join('\r\n');
+    `SUMMARY:${icsText(title)}`, `DESCRIPTION:${icsText(desc)}`, 'END:VEVENT', 'END:VCALENDAR',
+  ]
+    .map(icsFold)
+    .join('\r\n');
 }

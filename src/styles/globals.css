@@ -2637,8 +2637,12 @@ fieldset.field legend {
 }
 .windows {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
+}
+/* Window times are numerals: keep the .num face on Thai pages too (the Thai serif widens 10:00–13:00 into the diamond). */
+.choice__k.num {
+  font-family: var(--f-display);
 }
 .alert {
   display: grid;
@@ -2844,6 +2848,10 @@ fieldset.field legend {
 /* ── Confirmation ──────────────────────────────────────────────────────── */
 .confirm {
   padding-block: clamp(40px, 7vw, 112px) clamp(80px, 10vw, 160px);
+}
+/* While the order loads in the browser, hold the page's height so a language switch keeps its place. */
+.confirm[aria-busy='true'] {
+  min-height: 100vh;
 }
 .confirm__grid {
   row-gap: 48px;
@@ -3964,9 +3972,17 @@ button.adm-pill[aria-pressed='true'] {
     font-size: 10px;
     padding: 0;
   }
-  .adm-cell__n,
+  /* Phones: keep the day's load visible — a thin bar and a small count. */
   .adm-cell__meter {
-    display: none;
+    height: 3px;
+  }
+  .adm-cell__n {
+    font-size: 10px;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .adm-cell__n b {
+    font-size: 12px;
   }
   .adm-cell {
     min-height: 56px;
@@ -5273,4 +5289,35 @@ label:has(> input.sr-only:focus-visible) {
   .hero2__dots .hero2__toggle {
     flex: none;
   }
+}
+
+/* ── Static demo, 2026-09-28 ───────────────────────────────────────────────── */
+
+/* Hero: slides 2–4 load once the page is showing (enhance.js adds .is-live), not before the first paint. */
+html.js [data-carousel]:not(.is-live) .hero2__slide:not(.is-on) img {
+  display: none;
+}
+/* The hero stage fades in from 1%, not 0, so browsers count the photo as painted; and it isn't painted
+   at all under the loader, so that moment is when the visitor actually sees it. */
+.hero2__stage.rise {
+  animation-name: rise-stage;
+}
+@keyframes rise-stage {
+  from {
+    opacity: 0.01;
+    transform: translateY(18px);
+  }
+}
+html.js body:has(> .loader[data-on='true']) .hero2__stage {
+  visibility: hidden;
+}
+
+/* Works: a filtered link (?kind= ?colour= ?occasion=) hides the pre-built, unfiltered gallery until the
+   browser has applied the filter — no flash of the wrong photos, and none of them downloaded. An inline
+   script sets .lf-filtering and clears it after 12 s if scripts never run. */
+html.lf-filtering [data-prerender] {
+  visibility: hidden;
+}
+html.lf-filtering .gallery[data-prerender] {
+  display: none;
 }

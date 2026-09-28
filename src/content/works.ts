@@ -6,7 +6,7 @@
  * labelled that way on the page. None of these is a stocked product: each is a one-off, so the
  * page offers "order in this style", never "add to cart".
  *
- * Photographs: shop-owned, rights status `shop-owned-unapproved`. Local preview only.
+ * Photographs: the shop's own, approved by the shop for the demo site (2026-09-28).
  */
 
 export type ColourFamily = 'white' | 'blue' | 'yellow' | 'lavender' | 'pink' | 'peach' | 'red';
@@ -29,13 +29,12 @@ export interface Work {
   lowres?: boolean;
   w: number;
   h: number;
-  rights: 'shop-owned-unapproved';
 }
 
 const CLASSIC = { th: 'ช่อดอกไม้สด', en: 'Classic Flower Bouquet' };
 const CLASSIC_CAP = 'ช่อดอกไม้สด Classic Flower Bouquet';
 
-const raw: Omit<Work, 'no' | 'rights'>[] = [
+const raw: Omit<Work, 'no'>[] = [
   {
     id: 'DWs8CidAUfz', date: '2026-04-04', name: CLASSIC, caption: CLASSIC_CAP,
     seen: { th: 'กุหลาบพันธุ์สวนสีปะการังและชมพู แซมดอกสต็อกสีขาว', en: 'Coral and pink garden roses, loosened with white stock' },
@@ -115,7 +114,7 @@ type Extra = { id: string; w: number; h: number; colours: ColourFamily[]; note: 
 const BOX = { th: 'กล่องดอกไม้', en: 'Flower box' };
 const VASE = { th: 'ดอกไม้ในแจกัน', en: 'Flowers in a vase' };
 const TREE = { th: 'ต้นคริสต์มาสดอกไม้', en: 'Christmas flower tree' };
-const extra: Omit<Work, 'no' | 'rights'>[] = (extraRaw as Extra[]).map((x) => ({
+const extra: Omit<Work, 'no'>[] = (extraRaw as Extra[]).map((x) => ({
   id: x.id,
   date: '',
   name: x.occasion === 'christmas' ? TREE : x.format === 'box' ? BOX : x.format === 'vase' ? VASE : CLASSIC,
@@ -131,7 +130,7 @@ const extra: Omit<Work, 'no' | 'rights'>[] = (extraRaw as Extra[]).map((x) => ({
   lowres: Math.max(x.w, x.h) < 1000,
 }));
 
-export const works: Work[] = [...extra, ...raw.map((w) => ({ ...w, source: 'instagram' as const }))].map((w, i) => ({ ...w, no: i + 1, rights: 'shop-owned-unapproved' }));
+export const works: Work[] = [...extra, ...raw.map((w) => ({ ...w, source: 'instagram' as const }))].map((w, i) => ({ ...w, no: i + 1 }));
 
 /** Newest first, as the shop's grid runs. */
 /**

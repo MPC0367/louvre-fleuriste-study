@@ -91,7 +91,7 @@ export function Calendar({
     kbd.current = false;
   }, [focus, ym]);
 
-  const stateLabel = (s: DayState) => (s === 'horizon' ? t.order.dayState.lead : t.order.dayState[s as keyof typeof t.order.dayState]);
+  const stateLabel = (s: DayState) => t.order.dayState[s as keyof typeof t.order.dayState];
 
   return (
     <div className="cal">

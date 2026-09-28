@@ -7,7 +7,11 @@ import { AdminNav } from '@/components/admin/AdminNav';
 import { O2Credit } from '@/components/O2Credit';
 import { Logo } from '@/components/Logo';
 
-export const metadata: Metadata = { title: 'Admin', robots: { index: false, follow: false } };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang } = await params;
+  // No automatic phone links on iOS: the sample orders' numbers are invented.
+  return { title: isLang(lang) ? adminDict[lang].title : 'Admin', robots: { index: false, follow: false }, formatDetection: { telephone: false } };
+}
 
 export default async function AdminLayout({ children, params }: { children: React.ReactNode; params: Promise<{ lang: string }> }) {
   const { lang } = await params;

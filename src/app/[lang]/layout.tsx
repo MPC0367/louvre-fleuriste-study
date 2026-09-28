@@ -7,6 +7,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { Enhance } from '@/components/Enhance';
 import { dict, isLang, langs, type Lang } from '@/content/i18n';
 import { shop } from '@/content/shop';
+import { ogBase } from '@/lib/og';
 
 const fraunces = Fraunces({ subsets: ['latin'], axes: ['opsz', 'SOFT'], style: ['normal', 'italic'], variable: '--font-fraunces', display: 'swap' });
 const plex = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-plex', display: 'swap' });
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false, noimageindex: true } },
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://louvre-fleuriste.example'),
     alternates: { canonical: `/${lang}`, languages: { th: '/th', en: '/en' } },
-    openGraph: { title: t.htmlTitle, description: t.metaDescription, locale: lang === 'th' ? 'th_TH' : 'en_US', type: 'website' },
+    openGraph: { ...ogBase(lang), title: t.htmlTitle, description: t.metaDescription },
   };
 }
 

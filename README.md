@@ -19,7 +19,7 @@ Brief: `../documents/brief/` (studio copy, not in the repository).
 | Google map | embedded | embedded |
 
 Pages use `src/lib/client-api.ts` for anything to do with orders; it picks the store. `npm run pages:build`
-builds `out/` (the API routes step aside during the export and are always put back);
+builds `out/` from a copy of the project without the API routes (`.cache/pages-build`, so a running dev server is never disturbed);
 `node scripts/serve-pages.mjs` (preview `louvre-pages`, port 4413) serves `out/` the way Pages does, for
 testing; `npm run pages:deploy` force-pushes `out/` to the `gh-pages` branch of the public repo and turns
 Pages on. Deploy only when the studio says so.

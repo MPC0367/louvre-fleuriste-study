@@ -61,9 +61,9 @@ export function YearSection({ lang, occasions, builtOn }: { lang: Lang; occasion
         </div>
         <p className="year__next reveal">
           <span className="label">{m.year.next}</span>
-          <span className="year__count num">{nextOcc.days}</span>
+          <span className="year__count num">{nextOcc.days === 0 ? m.year.today : nextOcc.days}</span>
           <span className="year__nextname">
-            {m.year.days} · {t.occasions[nextOcc.key]}
+            {nextOcc.days === 0 ? t.occasions[nextOcc.key] : <>{m.year.days(nextOcc.days)} · {t.occasions[nextOcc.key]}</>}
           </span>
         </p>
       </div>

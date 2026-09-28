@@ -15,7 +15,8 @@ if (!existsSync(join(OUT, 'th', 'index.html')) || !existsSync(join(OUT, '.nojeky
 // Nothing that belongs to the studio or the shop's originals goes out: no data, documents, env files, full-size JPEGs.
 const walk = (d) => readdirSync(d).flatMap((n) => (statSync(join(d, n)).isDirectory() ? walk(join(d, n)) : [relative(OUT, join(d, n))]));
 const files = walk(OUT);
-const refused = files.filter((f) => /(^|\/)(documents|\.data|\.env)|\.(sqlite|pdf|csv|jpe?g|png|heic)$/i.test(f));
+// og.jpg is the one JPEG on purpose: the 1200×630 link-preview image.
+const refused = files.filter((f) => f !== 'og.jpg' && /(^|\/)(documents|\.data|\.env)|\.(sqlite|pdf|csv|jpe?g|png|heic)$/i.test(f));
 if (refused.length) throw new Error(`refusing to publish:\n${refused.slice(0, 20).join('\n')}`);
 
 const vis = sh('gh', ['repo', 'view', `${OWNER}/${REPO}`, '--json', 'visibility', '-q', '.visibility']);

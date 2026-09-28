@@ -28,7 +28,7 @@ export function OrdersView({ lang }: { lang: Lang }) {
   const sp: SP = {};
   for (const k of ['status', 'date', 'q', 'range', 'order'] as const) sp[k] = q.get(k) || undefined;
   const range = sp.range === 'past' ? 'past' : 'upcoming';
-  const status = sp.status ?? 'open';
+  const status = sp.status ?? (range === 'past' ? 'all' : 'open');
   const filter = { status, date: sp.date, q: sp.q, range: range as 'past' | 'upcoming' };
   const key = q.toString();
   const [data, setData] = useState<Data | null>(null);
@@ -58,7 +58,7 @@ export function OrdersView({ lang }: { lang: Lang }) {
     const p = new URLSearchParams();
     const merged = { ...sp, ...patch };
     for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
-    if (merged.status === 'open') p.delete('status');
+    if (merged.status === 'open' && merged.range !== 'past') p.delete('status');
     if (merged.range === 'upcoming') p.delete('range');
     const s = p.toString();
     return s ? `${base}?${s}` : base;
@@ -324,7 +324,7 @@ function Drawer({ o, lang, closeHref }: { o: AdminOrder; lang: Lang; closeHref: 
                 {o.recipient_phone && (
                   <>
                     {' '}
-                    · <a href={`tel:${tel(o.recipient_phone)}`}>{fmt(o.recipient_phone)}</a>
+                    · {o.seed ? <span>{fmt(o.recipient_phone)}</span> : <a href={`tel:${tel(o.recipient_phone)}`}>{fmt(o.recipient_phone)}</a>}
                   </>
                 )}
                 <br />
@@ -342,7 +342,7 @@ function Drawer({ o, lang, closeHref }: { o: AdminOrder; lang: Lang; closeHref: 
         <div>
           <dt>{d.sender}</dt>
           <dd>
-            <b>{o.sender_name}</b> · <a href={`tel:${tel(o.sender_phone)}`}>{fmt(o.sender_phone)}</a>
+            <b>{o.sender_name}</b> · {o.seed ? <span>{fmt(o.sender_phone)}</span> : <a href={`tel:${tel(o.sender_phone)}`}>{fmt(o.sender_phone)}</a>}
             {o.email && (
               <>
                 <br />
@@ -370,9 +370,15 @@ function Drawer({ o, lang, closeHref }: { o: AdminOrder; lang: Lang; closeHref: 
       )}
 
       <div className="adm-drawer__foot">
-        <a className="btn" href={`tel:${tel(o.sender_phone)}`}>
-          <Phone /> {d.call} {o.sender_name}
-        </a>
+        {o.seed ? (
+          <button type="button" className="btn" disabled>
+            <Phone /> {d.call} {o.sender_name} · {d.sample}
+          </button>
+        ) : (
+          <a className="btn" href={`tel:${tel(o.sender_phone)}`}>
+            <Phone /> {d.call} {o.sender_name}
+          </a>
+        )}
       </div>
     </aside>
   );

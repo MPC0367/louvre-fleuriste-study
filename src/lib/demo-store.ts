@@ -59,8 +59,10 @@ function write(s: State) {
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
     return true;
-  } catch {
-    return false;
+  } catch (e) {
+    // Only a full store should trigger eviction. Blocked storage (SecurityError) keeps using `memory` for the session.
+    const full = e instanceof DOMException && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014);
+    return !full;
   }
 }
 
@@ -204,7 +206,8 @@ export function adminUpdate(ref: string, patch: { status?: string; payment?: str
   const o = s.orders.find((x) => x.ref === ref);
   if (!o) return false;
   Object.assign(o, set);
-  return write(s) || memory === s;
+  write(s);
+  return true;
 }
 
 export function adminBlock(date: string, on: boolean) {

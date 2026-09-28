@@ -15,6 +15,44 @@ const img = (id: string, w: number) => imgUrl(photo(id), w, 85);
  * The shop's feed, re-authored: a snapshot of real posts (no embeds, no scraping at runtime).
  * ?post=<shortcode> opens the lightbox, so a post is linkable and the back button closes it.
  */
+/**
+ * The grid alone, with no useSearchParams: the Instagram page also renders it as Feed's Suspense
+ * fallback, so the static site carries the photos in its HTML.
+ */
+export function FeedGrid({ works, lang, onOpen, onFail }: { works: Work[]; lang: Lang; onOpen?: (id: string) => void; onFail?: (id: string) => void }) {
+  const t = dict[lang];
+  return (
+    <div className="feed">
+      {works.map((w, i) => (
+        <button
+          key={w.id}
+          type="button"
+          className="post reveal"
+          data-post={w.id}
+          style={{ ['--i' as string]: i % 3 }}
+          onClick={() => onOpen?.(w.id)}
+          aria-haspopup="dialog"
+          aria-label={`${t.ig.open}: ${w.name[lang]}, ${longDate(w.date, lang)}`}
+        >
+          <Image
+            src={photo(w.id)}
+            alt=""
+            fill
+            sizes="(max-width: 639px) 57vw, (max-width: 1439px) 38vw, 540px"
+            quality={82}
+            onError={() => onFail?.(w.id)}
+            style={{ objectFit: 'cover' }}
+          />
+          <span className="post__veil" aria-hidden="true">
+            <b>{w.name[lang]}</b>
+            <span>{longDate(w.date, lang)}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Feed({ works, lang }: { works: Work[]; lang: Lang }) {
   const t = dict[lang];
   const q = useSearchParams();
@@ -106,34 +144,7 @@ export function Feed({ works, lang }: { works: Work[]; lang: Lang }) {
 
   return (
     <>
-      <div className="feed">
-        {visible.map((w, i) => (
-          <button
-            key={w.id}
-            type="button"
-            className="post reveal"
-            data-post={w.id}
-            style={{ ['--i' as string]: i % 3 }}
-            onClick={() => setPost(w.id)}
-            aria-haspopup="dialog"
-            aria-label={`${t.ig.open}: ${w.name[lang]}, ${longDate(w.date, lang)}`}
-          >
-            <Image
-              src={photo(w.id)}
-              alt=""
-              fill
-              sizes="(max-width: 639px) 57vw, (max-width: 1439px) 38vw, 540px"
-              quality={82}
-              onError={() => setFailed((f) => ({ ...f, [w.id]: true }))}
-              style={{ objectFit: 'cover' }}
-            />
-            <span className="post__veil" aria-hidden="true">
-              <b>{w.name[lang]}</b>
-              <span>{longDate(w.date, lang)}</span>
-            </span>
-          </button>
-        ))}
-      </div>
+      <FeedGrid works={visible} lang={lang} onOpen={(id) => setPost(id)} onFail={(id) => setFailed((f) => ({ ...f, [id]: true }))} />
 
       <dialog ref={dlg} className="lightbox on-ink" onClose={onClose} aria-labelledby="lb-name" lang={lang}>
         {cur && (
@@ -148,7 +159,7 @@ export function Feed({ works, lang }: { works: Work[]; lang: Lang }) {
                   className="lightbox__img"
                   src={img(cur.id, 1080)}
                   srcSet={[640, 1080, 1440].map((w) => `${img(cur.id, w)} ${w}w`).join(', ')}
-                  sizes="min(640px, calc(100vw - 32px))"
+                  sizes={`(max-width: 899px) min(640px, calc(100vw - 32px), calc(48vh * ${(cur.w / cur.h).toFixed(3)})), min(640px, calc(100vw - 32px))`}
                   width={cur.w}
                   height={cur.h}
                   alt={lang === 'th' ? `${cur.name.th}: ${cur.seen.th}` : `${cur.name.en}: ${cur.seen.en}`}

@@ -48,8 +48,9 @@ export function PageLoader() {
     });
   }, []);
 
-  // Hide once the first page has loaded. The clock starts at navigation (or at the click, when a
-  // language switch remounted this component), not at hydration.
+  // Hide once the page has hydrated — not on window 'load', which lazy photos below the fold can hold
+  // back for seconds on a slow phone. The clock starts at navigation (or at the click, when a language
+  // switch remounted this component), so the veil still stays up for at least MIN_MS.
   useEffect(() => {
     let t = 0;
     const done = () => {
@@ -63,12 +64,8 @@ export function PageLoader() {
         lifted();
       }, wait);
     };
-    if (document.readyState === 'complete') done();
-    else window.addEventListener('load', done, { once: true });
-    return () => {
-      window.removeEventListener('load', done);
-      clearTimeout(t);
-    };
+    done();
+    return () => clearTimeout(t);
   }, []);
 
   // Show on internal link clicks that change the path, and hold the navigation until the veil is opaque.

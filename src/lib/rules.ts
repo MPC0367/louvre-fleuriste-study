@@ -46,6 +46,8 @@ export const rules = {
     box: [shop.boxFrom.value, 3000, 4500],
   } as Record<Kind, number[]>,
   minBudget: { bouquet: shop.bouquetFrom.value, box: shop.boxFrom.value } as Record<Kind, number>,
+  /** The most the order form takes; larger orders go to the shop directly. */
+  maxBudget: 200000,
   cardMax: 180,
 };
 
