@@ -8,11 +8,11 @@ import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const SRC = '../documents/grid-tiles';
-// The studio's own enhanced photos (2026-09-28, from "enhanced images", kept in documents/studio-enhanced/).
+// The studio's enhanced photos (2026-09-28, documents/facebook-gallery-2026-09-28/enhanced; see that folder's README).
 // Numbered by upload order: 002-061 are the grid tiles 8-01 to 9-30 in order (checked side by side in
 // .cache/enhanced-match/pairs.jpg); they replace the AI upscales. 001 and 062-083 are not in the grid
 // screenshots, so they are added as new works. 018 is tile 8-17, the closed-notice post, still skipped.
-const STUDIO = '../documents/studio-enhanced';
+const STUDIO = '../documents/facebook-gallery-2026-09-28/enhanced';
 const studio = existsSync(STUDIO) ? readdirSync(STUDIO).filter((f) => /\.jpe?g$/i.test(f)).sort() : [];
 const GRID_ORDER = readdirSync(SRC).filter((f) => /^[89]-/.test(f)).sort().map((f) => f.replace('.jpg', ''));
 const studioFor = Object.fromEntries(studio.slice(1, 61).map((f, i) => [GRID_ORDER[i], f]));

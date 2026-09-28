@@ -103,7 +103,7 @@ Three audit rounds, each run by independent headless-browser auditors with every
 
 ## Studio-enhanced photos (2026-09-28)
 
-The studio supplied 83 enhanced full-resolution photos ("enhanced images", hard-linked into `documents/studio-enhanced/`).
+The studio supplied 83 enhanced full-resolution photos of the shop's Facebook gallery (`documents/facebook-gallery-2026-09-28/`: `originals/`, `enhanced/`, two `extras/` not on the site, and a README on how they were made).
 
 - **60 replace grid photos.** Numbers 002–061 are grid tiles 8-01 to 9-30 in order; each pair was checked side by side in `.cache/enhanced-match/pairs.jpg`. `enhance-tiles.mjs` uses them in place of the AI upscales. 018 is 8-17, the closed-notice post, and stays off the site.
 - **23 are new works.** 001 and 062–083 were not in the grid screenshots, so they are added as new works (`x-studio-NNN`; 069 is a box).

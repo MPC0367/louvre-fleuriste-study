@@ -1,10 +1,10 @@
-// Matches the studio's enhanced photos (documents/enhanced images, named by upload order) to the grid
+// Matches the studio's enhanced photos (documents/facebook-gallery-2026-09-28/enhanced, named by gallery order) to the grid
 // tiles they replace (documents/grid-tiles/<k>.jpg), by comparing small colour thumbnails of the square
 // centre crop — the crop the feed grid shows. Writes .cache/enhanced-match/match.json for review.
 import sharp from 'sharp';
 import { readdirSync, writeFileSync } from 'node:fs';
 const S = 20;
-const ENH = '../enhanced images';
+const ENH = '../documents/facebook-gallery-2026-09-28/enhanced';
 const TILES = '../documents/grid-tiles';
 const vec = async (file, inset = 0) => {
   const { width: w, height: h } = await sharp(file).metadata();

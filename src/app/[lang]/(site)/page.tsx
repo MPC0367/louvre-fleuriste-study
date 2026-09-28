@@ -30,7 +30,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const heroWorks = pool.slice(0, 4);
   const register = pool.slice(4, 10);
   const hydrangea = heroWorks.find((w) => w.id === 'Dcc0QsXgRFW') ?? heroWorks[1];
-  // Both are the studio's enhanced full-resolution photos (documents/studio-enhanced/). Grid saves still at
+  // Both are the studio's enhanced full-resolution photos (documents/facebook-gallery-2026-09-28/enhanced). Grid saves still at
   // ~720px (w.lowres) must stay in small frames; don't put one here.
   const boxWork = getWork('x-grid-9-04-box');
   const xmasWork = getWork('x-grid-8-02-christmas-box') ?? null;

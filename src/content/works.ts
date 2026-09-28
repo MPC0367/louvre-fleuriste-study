@@ -25,7 +25,7 @@ export interface Work {
   format: 'bouquet' | 'vase' | 'box';
   /** Instagram shortcode posts link back; photos saved by hand into documents/more-photos/ don't. */
   source?: 'instagram' | 'saved';
-  /** A grid save still at its ~720px AI upscale (no studio-enhanced original yet): kept in small slots. */
+  /** A grid save still at its ~720px AI upscale (no enhanced original yet): kept in small slots. */
   lowres?: boolean;
   w: number;
   h: number;
