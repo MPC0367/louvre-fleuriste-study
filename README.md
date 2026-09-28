@@ -1,7 +1,11 @@
 # Louvre Fleuriste — design study
 
-An unsolicited O2 design study for Louvre Fleuriste (ร้านดอกไม้ลูฟวร์ เฟลอริสเตอ, Sukhumvit 77, Bangkok).
-**Local preview only. Not published and not the shop's site.** Brief: `~/Documents/Louvre-Fleuriste-Opus-5-Master-Prompt.pdf`.
+> **Unofficial concept.** An unsolicited design study by [O2 Design Studio](https://o2-designstudio.com/) for
+> Louvre Fleuriste (ร้านดอกไม้ลูฟวร์ เฟลอริสเตอ, Bangkok). It is not the shop's website and has no affiliation
+> with the shop. The site is not deployed, and every page is `noindex`. The shop's photographs are not in this
+> repository (see `NOTICE.md`): a fresh clone runs with empty photo frames until photos are added to `../documents/`.
+
+Brief: `../documents/Louvre-Fleuriste-Opus-5-Master-Prompt.pdf` (studio copy, not in the repository).
 
 ```bash
 npm install
@@ -16,7 +20,7 @@ The shop photographs every bouquet the same way: held upright in front of the sh
 fanned grey wrap, striped or silver ribbon, a navy diamond tag. The site is built from that one
 frame: the curtain is the backdrop (`.curtain`), the wrap is the paper ground, the navy tag
 is the ink and the signature element (`Tag.tsx`). Every choice in the order flow is written onto
-the tag (`.ordertag`). Photos are only 640 px, so they sit at native size on the curtain, not stretched full-bleed.
+the tag (`.ordertag`). Photos sit on the curtain at sizes their resolution holds (see "Photos and enhancement").
 
 ## Where things are
 
