@@ -1,0 +1,29 @@
+{
+  "name": "louvre-fleuriste",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "photos": "node scripts/photos.mjs",
+    "predev": "node scripts/photos.mjs",
+    "dev": "next dev -p 4410",
+    "prebuild": "node scripts/photos.mjs",
+    "build": "next build",
+    "start": "next start -p 4410",
+    "typecheck": "tsc --noEmit",
+    "snapshot:build": "node scripts/photos.mjs && NEXT_DIST_DIR=.next-build next build",
+    "snapshot:serve": "rm -rf .data-snapshot && NEXT_DIST_DIR=.next-build LF_DATA_DIR=.data-snapshot LF_ADMIN_DEMO=1 next start -p 4411",
+    "snapshot": "node scripts/snapshot.mjs"
+  },
+  "dependencies": {
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "playwright": "^1.63.0",
+    "typescript": "^5.7.0"
+  }
+}

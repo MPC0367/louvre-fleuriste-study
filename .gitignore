@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+.data/
+# The shop's photographs are never committed. scripts/photos.mjs copies them in from ../documents/.
+public/works/
+*.tsbuildinfo
+next-env.d.ts
+.next-build/
+.data-snapshot/
+snapshot/
+.cache/
+.impeccable/
