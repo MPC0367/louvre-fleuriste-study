@@ -25,9 +25,9 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   return {
     title: { default: t.htmlTitle, template: `%s — Louvre Fleuriste` },
     description: t.metaDescription,
-    // Design study: never indexed, canonical on a placeholder domain (concept-disclosure).
+    // A demo: never indexed. Canonical on the demo's own address (GitHub Pages) or a placeholder domain locally.
     robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false, noimageindex: true } },
-    metadataBase: new URL('https://louvre-fleuriste.example'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://louvre-fleuriste.example'),
     alternates: { canonical: `/${lang}`, languages: { th: '/th', en: '/en' } },
     openGraph: { title: t.htmlTitle, description: t.metaDescription, locale: lang === 'th' ? 'th_TH' : 'en_US', type: 'website' },
   };
@@ -44,7 +44,7 @@ export default async function LangLayout({ children, params }: { children: React
     '@type': 'Florist',
     name: shop.name.value,
     alternateName: shop.nameTh.value,
-    disambiguatingDescription: 'Unofficial design study by O2 Design Studio. Not the official website of Louvre Fleuriste.',
+    disambiguatingDescription: 'Demo website by O2 Design Studio for Louvre Fleuriste. Orders placed on this site are a demonstration and are not sent to the shop.',
     telephone: shop.phones.value.map((p) => p.tel),
     areaServed: 'Bangkok',
     priceRange: `฿${shop.boxFrom.value.toLocaleString('en-US')}+`,
@@ -53,7 +53,7 @@ export default async function LangLayout({ children, params }: { children: React
   return (
     <html lang={lang} suppressHydrationWarning className={`${fraunces.variable} ${plex.variable} ${plexThai.variable} ${serifThai.variable} ${jost.variable}`}>
       <head>
-        {/* Louvre Fleuriste — unsolicited design study by O2 Design Studio. Not the shop's official site. Photographs belong to the shop. */}
+        {/* Louvre Fleuriste — demo website by O2 Design Studio, made with the shop's approval. Orders here are a demonstration. Photographs belong to the shop. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>

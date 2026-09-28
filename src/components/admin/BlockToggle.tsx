@@ -1,6 +1,6 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { useRef, useTransition } from 'react';
+import { useRef, useState } from 'react';
+import { adminBlock } from '@/lib/client-api';
 
 /**
  * Blocks or reopens one day. It stays focusable while the change is saving (aria-disabled, not
@@ -18,8 +18,7 @@ export function BlockToggle({
   blocked: boolean;
   labels: { block: string; unblock: string; blockShort: string; unblockShort: string };
 }) {
-  const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
   const busy = useRef(false);
   const full = blocked ? labels.unblock : labels.block;
   return (
@@ -32,11 +31,12 @@ export function BlockToggle({
       onClick={async () => {
         if (busy.current || pending) return;
         busy.current = true;
+        setPending(true);
         try {
-          const r = await fetch('/api/admin/days', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date, blocked: !blocked }) }).catch(() => null);
-          if (r?.ok) start(() => router.refresh());
+          await adminBlock(date, !blocked); // the capacity view reloads when the change is announced
         } finally {
           busy.current = false;
+          setPending(false);
         }
       }}
     >

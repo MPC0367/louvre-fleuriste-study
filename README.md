@@ -1,11 +1,28 @@
 # Louvre Fleuriste — design study
 
-> **Unofficial concept.** An unsolicited design study by [O2 Design Studio](https://o2-designstudio.com/) for
-> Louvre Fleuriste (ร้านดอกไม้ลูฟวร์ เฟลอริสเตอ, Bangkok). It is not the shop's website and has no affiliation
-> with the shop. The site is not deployed, and every page is `noindex`. The shop's photographs are not in this
-> repository (see `NOTICE.md`): a fresh clone runs with empty photo frames until photos are added to `../documents/`.
+> **Demo website** by [O2 Design Studio](https://o2-designstudio.com/) for Louvre Fleuriste (ร้านดอกไม้ลูฟวร์
+> เฟลอริสเตอ, Bangkok), published with the shop's approval. **Live demo: https://mpc0367.github.io/louvre-fleuriste-study/**
+> Ordering there is a demonstration: orders stay in the visitor's browser and never reach the shop. Every page is
+> `noindex`. The shop's photographs are not in `main` (see `NOTICE.md`): a fresh clone runs with empty photo
+> frames until photos are added to `../documents/`.
 
-Brief: `../documents/Louvre-Fleuriste-Opus-5-Master-Prompt.pdf` (studio copy, not in the repository).
+Brief: `../documents/brief/` (studio copy, not in the repository).
+
+## Two builds
+
+| | Local site (`npm run dev`, `build`) | Live demo (`npm run pages:build`, `pages:deploy`) |
+|---|---|---|
+| Serves | Next.js server at the root | static files on GitHub Pages under `/louvre-fleuriste-study/` |
+| Orders, confirmation, back office | SQLite in `.data/` through `src/app/api/` | `src/lib/demo-store.ts` in the visitor's browser (localStorage) |
+| Rules | `src/lib/engine.ts` — shared by both, so they can't drift | same |
+| Photos | Next.js resizes on request | `scripts/build-pages.mjs` pre-renders WebP at every width (`out/img/`) |
+| Google map | embedded | embedded |
+
+Pages use `src/lib/client-api.ts` for anything to do with orders; it picks the store. `npm run pages:build`
+builds `out/` (the API routes step aside during the export and are always put back);
+`node scripts/serve-pages.mjs` (preview `louvre-pages`, port 4413) serves `out/` the way Pages does, for
+testing; `npm run pages:deploy` force-pushes `out/` to the `gh-pages` branch of the public repo and turns
+Pages on. Deploy only when the studio says so.
 
 ```bash
 npm install

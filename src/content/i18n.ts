@@ -16,7 +16,7 @@ const th = {
   nav: { works: 'ผลงาน', order: 'สั่งดอกไม้', instagram: 'อินสตาแกรม', visit: 'ติดต่อร้าน', menu: 'เมนู', close: 'ปิด', home: 'หน้าแรก' },
   skip: 'ข้ามไปยังเนื้อหา',
   concept: {
-    bar: 'แบบร่างเว็บไซต์โดย O2 Design Studio เสนอต่อ Louvre Fleuriste ไม่ใช่เว็บไซต์ทางการของร้าน คำสั่งซื้อในหน้านี้จะไม่ถูกส่งถึงร้าน',
+    bar: 'เว็บไซต์ตัวอย่างโดย O2 Design Studio สำหรับ Louvre Fleuriste การสั่งซื้อในหน้านี้เป็นการสาธิต ไม่ถูกส่งถึงร้าน สั่งดอกไม้จริงโทรหรือทัก LINE ของร้าน',
     demo: 'ตัวอย่าง',
     demoNote: 'กฎการรับออร์เดอร์ในหน้านี้เป็นตัวอย่าง รอร้านยืนยัน',
   },
@@ -262,7 +262,7 @@ const en: Dict = {
   nav: { works: 'Works', order: 'Order flowers', instagram: 'Instagram', visit: 'Contact', menu: 'Menu', close: 'Close', home: 'Home' },
   skip: 'Skip to content',
   concept: {
-    bar: 'A design study by O2 Design Studio for Louvre Fleuriste. Not the shop’s official website — orders placed here are not sent to the shop.',
+    bar: 'Demo website by O2 Design Studio for Louvre Fleuriste. Orders placed here are a demonstration and don’t reach the shop — to order, call or message the shop on LINE.',
     demo: 'Sample',
     demoNote: 'Ordering rules on this page are samples, awaiting the shop’s confirmation.',
   },

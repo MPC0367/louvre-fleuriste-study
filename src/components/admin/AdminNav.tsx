@@ -4,10 +4,11 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import type { Lang } from '@/content/i18n';
 import { adminDict } from '@/content/admin-i18n';
+import { trimSlash } from '@/lib/paths';
 
 function Nav({ lang }: { lang: Lang }) {
   const a = adminDict[lang];
-  const path = usePathname();
+  const path = trimSlash(usePathname());
   const q = useSearchParams();
   const base = `/${lang}/admin`;
   const items = [

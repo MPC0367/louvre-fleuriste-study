@@ -5,10 +5,11 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { dict, longDate, type Lang } from '@/content/i18n';
 import { photo, postUrl, type Work } from '@/content/works';
+import { imgUrl } from '@/lib/paths';
 import { Arrow, Close } from './Icons';
 import { keepWords } from '@/lib/thai';
 
-const img = (id: string, w: number) => `/_next/image?url=${encodeURIComponent(photo(id))}&w=${w}&q=85`;
+const img = (id: string, w: number) => imgUrl(photo(id), w, 85);
 
 /**
  * The shop's feed, re-authored: a snapshot of real posts (no embeds, no scraping at runtime).

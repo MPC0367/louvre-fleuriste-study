@@ -2,12 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { isLang, type Lang } from '@/content/i18n';
 import { adminDict } from '@/content/admin-i18n';
-import { adminAllowed } from '@/lib/admin';
+import { adminAllowed } from '@/lib/admin-guard';
 import { AdminNav } from '@/components/admin/AdminNav';
 import { O2Credit } from '@/components/O2Credit';
 import { Logo } from '@/components/Logo';
 
-export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Admin', robots: { index: false, follow: false } };
 
 export default async function AdminLayout({ children, params }: { children: React.ReactNode; params: Promise<{ lang: string }> }) {

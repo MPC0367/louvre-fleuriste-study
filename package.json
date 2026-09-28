@@ -10,9 +10,11 @@
     "build": "next build",
     "start": "next start -p 4410",
     "typecheck": "tsc --noEmit",
-    "snapshot:build": "node scripts/photos.mjs && NEXT_DIST_DIR=.next-build next build",
+    "snapshot:build": "node scripts/photos.mjs && LF_ADMIN_DEMO=1 NEXT_DIST_DIR=.next-build next build",
     "snapshot:serve": "rm -rf .data-snapshot && NEXT_DIST_DIR=.next-build LF_DATA_DIR=.data-snapshot LF_ADMIN_DEMO=1 next start -p 4411",
-    "snapshot": "node scripts/snapshot.mjs"
+    "snapshot": "node scripts/snapshot.mjs",
+    "pages:build": "node scripts/build-pages.mjs",
+    "pages:deploy": "node scripts/deploy-pages.mjs"
   },
   "dependencies": {
     "next": "15.5.4",

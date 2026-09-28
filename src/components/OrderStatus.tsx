@@ -1,25 +1,40 @@
+'use client';
 import Link from 'next/link';
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { baht, dict, isLang, longDate, type Lang } from '@/content/i18n';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { baht, dict, longDate, type Lang } from '@/content/i18n';
 import { shop } from '@/content/shop';
 import { colourFamilies, getWork } from '@/content/works';
-import { getOrder } from '@/lib/booking';
 import { rules } from '@/lib/rules';
-import { Photo } from '@/components/Photo';
-import { Arrow } from '@/components/Icons';
+import { orderIcs, type PublicOrder } from '@/lib/engine';
+import { download, getOrder } from '@/lib/client-api';
+import { Photo } from './Photo';
+import { Arrow } from './Icons';
 
-export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Order', robots: { index: false, follow: false } };
-
-export default async function Confirmation({ params, searchParams }: { params: Promise<{ lang: string; ref: string }>; searchParams: Promise<{ t?: string }> }) {
-  const { lang: l, ref } = await params;
-  if (!isLang(l)) notFound();
-  const lang = l as Lang;
+/**
+ * The confirmation a customer lands on after ordering: /order/status?ref=…&t=…. The token in the link is
+ * the only key to the order (it is not guessable from the reference), and only the customer-safe fields
+ * are shown.
+ */
+export function OrderStatus({ lang }: { lang: Lang }) {
   const t = dict[lang];
   const c = t.confirm;
-  const { t: token } = await searchParams;
-  const order = getOrder(ref, token ?? '');
+  const q = useSearchParams();
+  const ref = q.get('ref') ?? '';
+  const token = q.get('t') ?? '';
+  const [order, setOrder] = useState<PublicOrder | null | undefined>(undefined);
+
+  useEffect(() => {
+    let live = true;
+    getOrder(ref, token)
+      .then((o) => live && setOrder(o))
+      .catch(() => live && setOrder(null));
+    return () => {
+      live = false;
+    };
+  }, [ref, token]);
+
+  if (order === undefined) return <section className="wrap confirm" aria-busy="true" />;
 
   if (!order) {
     return (
@@ -69,10 +84,10 @@ export default async function Confirmation({ params, searchParams }: { params: P
             </p>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-            <a className="btn" href={`/api/orders/${order.ref}/ics?t=${encodeURIComponent(token!)}`} download>
+            <button type="button" className="btn" onClick={() => download(`${order.ref}.ics`, orderIcs(order), 'text/calendar;charset=utf-8')}>
               <span className="btn__diamond" aria-hidden="true" />
               {c.calendar}
-            </a>
+            </button>
             <Link href={`/${lang}/works`} className="btn btn--ghost">
               {c.again} <Arrow />
             </Link>

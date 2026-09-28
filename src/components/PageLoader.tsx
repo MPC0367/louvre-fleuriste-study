@@ -2,6 +2,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { LATTICE_PATH, LATTICE_VIEWBOX } from './Logo';
+import { stripBase } from '@/lib/paths';
 
 const MIN_MS = 650;
 const VEIL_MS = 170; // .loader[data-on='true'] fades in over 160ms; the page swaps only once it is opaque
@@ -89,7 +90,8 @@ export function PageLoader() {
       const keep = !!a.closest('.langswitch'); // the language switch keeps the scroll position
       clearTimeout(pending);
       pending = window.setTimeout(() => {
-        if (location.href === from) router.push(url.pathname + url.search + url.hash, { scroll: !keep });
+        // The link's pathname carries the base path on GitHub Pages; the router adds it back itself.
+        if (location.href === from) router.push(stripBase(url.pathname) + url.search + url.hash, { scroll: !keep });
       }, VEIL_MS);
     };
     document.addEventListener('click', click, true);

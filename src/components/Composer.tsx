@@ -8,6 +8,7 @@ import { colourFamilies, getWork, photo, worksNewest } from '@/content/works';
 import { rules, type Kind, type Method } from '@/lib/rules';
 import { Arrow } from './Icons';
 import { keepWords } from '@/lib/thai';
+import { availability, placeOrder, uploadPicture } from '@/lib/client-api';
 import { Tag } from './Tag';
 import { Calendar, type Day } from './Calendar';
 
@@ -269,13 +270,13 @@ export function Composer({ lang }: { lang: Lang }) {
       notes: [d.similar ? '[similar]' : '', d.notes].filter(Boolean).join(' '),
     };
     try {
-      const r = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      const j = await r.json().catch(() => ({}));
-      if (r.ok && j.ref) {
+      const r = await placeOrder(body);
+      const j = r.json as { ref?: string; token?: string; error?: ServerError };
+      if (r.ok && j.ref && j.token) {
         try {
           localStorage.removeItem(KEY);
         } catch {}
-        router.push(`/${lang}/order/${j.ref}?t=${encodeURIComponent(j.token)}`);
+        router.push(`/${lang}/order/status?ref=${encodeURIComponent(j.ref)}&t=${encodeURIComponent(j.token)}`);
         return;
       }
       const err: ServerError = j.error ?? { code: 'server' };
@@ -308,8 +309,7 @@ export function Composer({ lang }: { lang: Lang }) {
       if (!f) return;
       setLoadingDays(true);
       try {
-        const r = await fetch(`/api/availability?from=${f}&days=42`, { cache: 'no-store' });
-        const j = await r.json();
+        const j = await availability(f, 42);
         const m: Record<string, Day> = {};
         for (const x of j.days) m[x.date] = x;
         setDays((p) => ({ ...p, ...m }));
@@ -344,15 +344,12 @@ export function Composer({ lang }: { lang: Lang }) {
       } else {
         setPreview(null);
       }
-      const fd = new FormData();
-      fd.append('file', blob, file.name.replace(/\.(png|webp)$/i, '.jpg'));
-      const r = await fetch('/api/uploads', { method: 'POST', body: fd });
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        throw new Error(j.error === 'type' ? o.uploadType : j.error === 'too_big' ? o.uploadBig : o.uploadFail);
+      const r = await uploadPicture(blob, file.name.replace(/\.(png|webp)$/i, '.jpg'));
+      if (!r.ok || typeof r.json.id !== 'string') {
+        throw new Error(r.json.error === 'type' ? o.uploadType : r.json.error === 'too_big' ? o.uploadBig : o.uploadFail);
       }
-      const j = await r.json();
-      setD((p) => (p ? { ...p, uploadId: j.id, uploadName: file.name, uploadThumb: thumb } : p));
+      const id = r.json.id;
+      setD((p) => (p ? { ...p, uploadId: id, uploadName: file.name, uploadThumb: thumb } : p));
     } catch (e) {
       setUploadErr(e instanceof Error && e.message ? e.message : o.uploadFail);
       setPreview(null);

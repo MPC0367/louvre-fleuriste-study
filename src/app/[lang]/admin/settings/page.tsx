@@ -4,7 +4,6 @@ import { shop } from '@/content/shop';
 import { rules } from '@/lib/rules';
 
 
-export const dynamic = 'force-dynamic';
 export default async function Settings({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: l } = await params;
   const lang = l as Lang;

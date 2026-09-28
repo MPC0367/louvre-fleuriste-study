@@ -1,27 +1,27 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
+import { adminUpdate } from '@/lib/client-api';
 import type { Lang } from '@/content/i18n';
 import { adminDict } from '@/content/admin-i18n';
 
 const STATUSES = ['new', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'completed', 'cancelled'];
 const PAYMENTS = ['unpaid', 'deposit', 'paid'];
 
-/** Status, payment and internal notes for one order. Saves immediately, then refreshes the server view. */
+/** Status, payment and internal notes for one order. Saves immediately; the open views reload. */
 export function OrderActions({ lang, orderRef, status, payment, notes }: { lang: Lang; orderRef: string; status: string; payment: string; notes: string }) {
   const a = adminDict[lang].drawer;
   const ad = adminDict[lang];
-  const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
   const [text, setText] = useState(notes);
   const [msg, setMsg] = useState<string | null>(null);
 
   async function patch(body: Record<string, string>) {
     setMsg(null);
-    const r = await fetch(`/api/admin/orders/${orderRef}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null);
-    if (!r?.ok) return setMsg(a.failed);
+    setPending(true);
+    const ok = await adminUpdate(orderRef, body).catch(() => false);
+    setPending(false);
+    if (!ok) return setMsg(a.failed);
     if ('internal_notes' in body) setMsg(a.saved);
-    start(() => router.refresh());
   }
 
   return (

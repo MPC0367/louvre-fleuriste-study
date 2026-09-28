@@ -89,13 +89,14 @@ async function main() {
       return r.json();
     }, { ...draft, lang: l, recipientName: draft.recipientName });
     if (!res.ref) throw new Error('sample order failed: ' + JSON.stringify(res));
-    await capture(page, `/${l}/order/${res.ref}?t=${encodeURIComponent(res.token)}`, { key: `/${l}/order/confirmation` });
+    await capture(page, `/${l}/order/status?ref=${res.ref}&t=${encodeURIComponent(res.token)}`, { key: `/${l}/order/confirmation`, wait: '.confirm__ref' });
 
     // Admin — the order just placed arrives at the top of "awaiting confirmation".
     const today = avail.today;
-    for (const q of ['', '?status=new', '?range=past', '?status=all', `?date=${today}`]) await capture(page, `/${l}/admin${q}`);
-    for (const ref of [res.ref, ...DRAWERS]) await capture(page, `/${l}/admin?order=${ref}`);
-    await capture(page, `/${l}/admin/capacity`);
+    // The admin screens load their data in the browser: capture once it has arrived.
+    for (const q of ['', '?status=new', '?range=past', '?status=all', `?date=${today}`]) await capture(page, `/${l}/admin${q}`, { wait: '.adm__head, .adm-empty:not([aria-busy="true"])' });
+    for (const ref of [res.ref, ...DRAWERS]) await capture(page, `/${l}/admin?order=${ref}`, { wait: '.adm-drawer' });
+    await capture(page, `/${l}/admin/capacity`, { wait: '.adm-cell' });
     await capture(page, `/${l}/admin/settings`);
   }
 

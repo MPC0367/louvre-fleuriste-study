@@ -7,10 +7,11 @@ import { shop } from '@/content/shop';
 import { LangSwitch } from './LangSwitch';
 import { Phone } from './Icons';
 import { Logo } from './Logo';
+import { trimSlash } from '@/lib/paths';
 
 export function Header({ lang }: { lang: Lang }) {
   const t = dict[lang];
-  const path = usePathname();
+  const path = trimSlash(usePathname());
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
