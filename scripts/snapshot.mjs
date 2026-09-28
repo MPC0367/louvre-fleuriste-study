@@ -149,9 +149,9 @@ body.lf-modal .lf-switch{display:none}
 </head>
 <body>
 ${loaderHtml.replace('class="loader"', 'id="lf-loader" class="loader"')}
+<nav class="lf-switch" aria-label="Preview"><a href="#/th" data-lf-switch="site">Website</a><a href="#/th/admin" data-lf-switch="admin">Back office</a></nav>
 <div id="lf-app"></div>
 <div class="lf-toast" role="status" aria-live="polite" hidden></div>
-<nav class="lf-switch" aria-label="Preview"><a href="#/th" data-lf-switch="site">Website</a><a href="#/th/admin" data-lf-switch="admin">Back office</a></nav>
 <script type="application/json" id="lf-cfg">${JSON.stringify(cfg).replace(/</g, '\\u003c')}</script>
 <script type="application/json" id="lf-img">${JSON.stringify(images)}</script>
 <script type="text/plain" id="lf-pages">${packed}</script>
