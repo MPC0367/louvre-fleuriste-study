@@ -46,7 +46,16 @@ cpSync('src', join(WORK, 'src'), { recursive: true, filter: (p) => resolve(p) !=
 for (const file of ['next.config.mjs', 'tsconfig.json', 'package.json']) cpSync(file, join(WORK, file));
 symlinkSync(resolve('node_modules'), join(WORK, 'node_modules'));
 symlinkSync(resolve('public'), join(WORK, 'public'));
-run('npx', ['next', 'build'], env, WORK);
+// next/font sometimes gets an unreadable answer from Google Fonts ('reading \'1\''): try up to three times.
+for (let i = 1; ; i++) {
+  try {
+    run('npx', ['next', 'build'], env, WORK);
+    break;
+  } catch (e) {
+    if (i === 3) throw e;
+    console.log(`pages: build attempt ${i} failed, retrying`);
+  }
+}
 renameSync(join(WORK, OUT), OUT);
 rmSync(WORK, { recursive: true, force: true });
 if (!existsSync(join(OUT, 'th', 'index.html'))) throw new Error(`${OUT}/th/index.html missing: the export did not land in ${OUT}/`);
